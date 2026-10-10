@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = 'models/gemini-2.5-flash';
+const MODEL = 'gemini-3.8-flash';
 function systemPrompt({ mode, friend, goals, wantsReport }) {
   const support = mode === 'traveler' ? 'Traveler: give many supports. Use Korean 반말 often. Give word hints, blanks, and short sentence frames.' : mode === 'explorer' ? 'Explorer: give some supports. Use easy English first, with short Korean 반말 help when needed. Give blanks, not full answers, unless the student is stuck.' : 'Guide: use mostly very easy English. Do not give sentence frames first. If the student is stuck, give a short hint.';
   return `You are ${friend.friend}, a friendly 12-year-old foreign friend from ${friend.country}. You chat with a Korean Grade 5 student.

@@ -38,8 +38,28 @@ export default async function handler(req, res) {
     const body = { systemInstruction:{parts:[{text:systemPrompt({mode,friend,goals,wantsReport})}]}, contents, generationConfig:{temperature:wantsReport?0.2:0.55, maxOutputTokens:wantsReport?900:160} };
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
     const j = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error:j.error?.message || 'Gemini API error', raw:j });
-    let reply = j.candidates?.[0]?.content?.parts?.map(p=>p.text).join('\n').trim() || 'Sorry, try again!';
+
+if (!r.ok) {
+  const msg = j.error?.message || 'Gemini API error';
+
+  if (
+    msg.includes('high demand') ||
+    msg.includes('overloaded') ||
+    msg.includes('temporarily') ||
+    msg.includes('try again later')
+  ) {
+    return res.status(200).json({
+      reply: "Good try! My name is Alex. How do you spell your name?"
+    });
+  }
+
+  return res.status(r.status).json({
+    error: msg,
+    raw: j
+  });
+}
+
+let reply = j.candidates?.[0]?.content?.parts?.map(p=>p.text).join('\n').trim() || 'Sorry, try again!';
     if (reply.length < 6 && !wantsReport) reply = 'Good try! Let’s keep talking. What do you like?';
     return res.status(200).json({ reply });
   } catch(e) { return res.status(500).json({ error:e.message || 'Server error' }); }
